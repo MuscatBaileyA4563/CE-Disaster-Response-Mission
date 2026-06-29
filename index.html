@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>南海トラフ巨大地震 CE災害対応ミッション</title>
+
+<style>
+:root{
+  --bg:#080c12;
+  --card:#151b24;
+  --card2:#101722;
+  --line:#303947;
+  --text:#f4f7fb;
+  --muted:#a9b4c0;
+  --accent:#00c896;
+  --danger:#ff5c5c;
+  --warn:#ffd166;
+  --blue:#4ea1ff;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top, #1d2f42 0%, #0b111a 45%, #05070a 100%);
+  color:var(--text);
+}
+
+.wrapper{
+  max-width:760px;
+  margin:0 auto;
+  padding:20px;
+}
+
+.card{
+  background:rgba(21,27,36,.96);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:22px;
+  box-shadow:0 0 28px rgba(0,0,0,.45);
+  margin-bottom:16px;
+}
+
+h1,h2,h3{
+  margin-top:0;
+  line-height:1.35;
+}
+
+h1{
+  font-size:26px;
+}
+
+h2{
+  font-size:22px;
+}
+
+h3{
+  font-size:18px;
+  color:var(--warn);
+}
+
+p{
+  line-height:1.8;
+}
+
+button{
+  width:100%;
+  padding:15px;
+  margin:8px 0;
+  border:none;
+  border-radius:13px;
+  font-size:16px;
+  font-weight:700;
+  background:#263447;
+  color:white;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#38506c;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.primary{
+  background:#087f5b;
+}
+
+.primary:hover{
+  background:#0ca678;
+}
+
+.secondary{
+  background:#334155;
+}
+
+.correct{
+  background:#146c43!important;
+}
+
+.wrong{
+  background:#8b1e1e!important;
+}
+
+.hidden{
+  display:none;
+}
+
+.notice{
+  background:#111827;
+  border-left:4px solid var(--blue);
+  padding:12px;
+  border-radius:10px;
+  margin:14px 0;
+}
+
+.alert{
+  color:var(--warn);
+  font-weight:700;
+}
+
+.danger{
+  color:var(--danger);
+  font-weight:700;
+}
+
+.muted{
+  color:var(--muted);
+  font-size:14px;
+}
+
+.code{
+  font-size:30px;
+  letter-spacing:10px;
+  text-align:center;
+  background:#000;
+  padding:16px;
+  border-radius:12px;
+  margin-top:16px;
+  color:#00ff99;
+  border:1px solid #1f6f50;
+}
+
+.large{
+  font-size:36px;
+}
+
+.booth-name{
+  color:#9cc9ff;
+  font-weight:700;
+  font-size:15px;
+  margin-bottom:8px;
+}
+
+.status-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+  margin-top:14px;
+}
+
+.status-item{
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px;
+  background:var(--card2);
+}
+
+.status-title{
+  font-weight:700;
+}
+
+.badge{
+  display:inline-block;
+  margin-top:6px;
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:13px;
+  background:#30363d;
+  color:#d0d7de;
+}
+
+.badge.done{
+  background:#0f5132;
+  color:#9ff0c3;
+}
+
+.badge.open{
+  background:#1f4e79;
+  color:#b6dcff;
+}
+
+.qr-list{
+  background:#0b111a;
+  border:1px dashed #3d4b5c;
+  border-radius:12px;
+  padding:12px;
+  margin-top:12px;
+}
+
+.qr-list div{
+  padding:8px 0;
+  border-bottom:1px solid #222c38;
+}
+
+.qr-list div:last-child{
+  border-bottom:none;
+}
+
+.small-button{
+  font-size:14px;
+  padding:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+  <!-- トップ画面 -->
+  <section id="home" class="card hidden">
+    <h1>南海トラフ巨大地震</h1>
+    <h2>CE災害対応ミッション</h2>
+
+    <p>
+      2026年12月◯日 14時32分。<br>
+      高知県沖を震源とする南海トラフ巨大地震が発生。
+    </p>
+
+    <p>
+      病院は停電し、非常用電源に切り替わった。<br>
+      電話は不通。電子カルテも停止。
+    </p>
+
+    <div class="notice">
+      <strong>災害対策本部より緊急連絡。</strong><br>
+      人工心肺室、透析室、ME室、心臓カテーテル室に異常発生。<br>
+      CEチームは各現場へ向かい、状況を確認せよ。
+    </div>
+
+    <p class="alert">
+      各ブースに設置されたQRコードを読み取ると、現場情報が表示されます。
+    </p>
+
+    <button class="primary" onclick="showStatus()">進行状況を確認する</button>
+    <button class="secondary" onclick="resetProgress()">進行状況をリセット</button>
+
+    <div class="qr-list">
+      <div>人工心肺室：<span class="muted">?booth=cpb</span></div>
+      <div>透析室：<span class="muted">?booth=dialysis</span></div>
+      <div>ME室：<span class="muted">?booth=me</span></div>
+      <div>心臓カテーテル室：<span class="muted">?booth=cath</span></div>
+    </div>
+
+    <p class="muted">
+      ※この一覧はデモ確認用です。本番では非表示にして、各QRコードのみ掲示する想定です。
+    </p>
+  </section>
+
+  <!-- QRなしアクセス時 -->
+  <section id="locked" class="card hidden">
+    <h2>現場情報は未取得です</h2>
+
+    <p>
+      この画面では問題は表示されません。
+    </p>
+
+    <div class="notice">
+      <strong>各ブースのQRコードを読み取ってください。</strong><br>
+      QRコードを読み取ることで、その現場の問題が表示されます。
+    </div>
+
+    <button class="primary" onclick="goHome()">トップへ戻る</button>
+  </section>
+
+  <!-- ステージ画面 -->
+  <section id="stage" class="card hidden">
+    <div id="boothName" class="booth-name"></div>
+    <h2 id="stageTitle"></h2>
+    <h3 id="stageSub"></h3>
+
+    <p id="story"></p>
+
+    <div class="notice">
+      <strong>現場判断問題</strong><br>
+      <span id="question"></span>
+    </div>
+
+    <div id="choices"></div>
+    <div id="result"></div>
+
+    <div class="code">
+      暗号：<span id="stageCodes">----</span>
+    </div>
+  </section>
+
+  <!-- メーカー説明フェーズ -->
+  <section id="manufacturer" class="card hidden">
+    <h2>メーカー説明フェーズ</h2>
+
+    <p id="manufacturerText"></p>
+
+    <div class="notice">
+      <strong>ブース担当者から説明を受けてください。</strong><br>
+      説明を受けた後、暗号を獲得できます。
+    </div>
+
+    <button class="primary" onclick="completeBooth()">
+      説明を受けたので次の現場へ急行する
+    </button>
+  </section>
+
+  <!-- 進行状況 -->
+  <section id="status" class="card hidden">
+    <h2>CEチーム活動状況</h2>
+
+    <p class="muted">
+      QRコードを読み取った現場のみ、問題が表示されます。
+    </p>
+
+    <div class="code">
+      <span id="statusCodes">----</span>
+    </div>
+
+    <div id="statusGrid" class="status-grid"></div>
+
+    <button id="finalButton" class="primary hidden" onclick="showEnding()">
+      最終コードを確認する
+    </button>
+
+    <button onclick="goHome()">トップへ戻る</button>
+  </section>
+
+  <!-- エンディング -->
+  <section id="ending" class="card hidden">
+    <h1>MISSION COMPLETE</h1>
+
+    <p>
+      CEチームは各現場で初動対応を完了した。
+    </p>
+
+    <p>
+      集めた暗号は――
+    </p>
+
+    <div id="finalCode" class="code large"></div>
+
+    <div class="notice">
+      <strong>最終コード：KIZU</strong><br>
+      災害時に守るべきもの。<br>
+      それは機器だけではなく、患者と医療をつなぐ現場判断である。
+    </div>
+
+    <button class="primary" onclick="goHome()">トップへ戻る</button>
+  </section>
+
+</div>
+
+<script>
+const STAGES = {
+  cpb:{
+    order:1,
+    title:"STAGE1　人工心肺室",
+    sub:"鳴り止まないアラーム",
+    booth:"人工心肺・補助循環関連ブース",
+    story:"緊急CABG中。停電後、人工心肺装置のアラームが鳴り響く。酸素ボンベ残量は20分。",
+    question:"最優先で確認すべきものは？",
+    choices:[
+      "① ACT",
+      "② 酸素供給",
+      "③ ヘモグロビン"
+    ],
+    answer:1,
+    code:"K",
+    manufacturerText:"人工心肺装置、酸素供給、非常時のバックアップ体制について、ブース担当者から説明を受けてください。"
+  },
+
+  dialysis:{
+    order:2,
+    title:"STAGE2　透析室",
+    sub:"限られた水",
+    booth:"透析関連ブース",
+    story:"透析患者28人。RO装置が停止し、供給可能な透析液は通常の半分。",
+    question:"災害時に最も重要な考え方は？",
+    choices:[
+      "① 到着順に透析する",
+      "② 全員に通常透析を行う",
+      "③ 重症度や緊急性を考慮し優先順位を決定する"
+    ],
+    answer:2,
+    code:"I",
+    manufacturerText:"災害時の透析、水処理装置、透析液供給、装置停止時の対応について、ブース担当者から説明を受けてください。"
+  },
+
+  me:{
+    order:3,
+    title:"STAGE3　ME室",
+    sub:"消えた機器管理台帳",
+    booth:"医療機器管理関連ブース",
+    story:"サーバーダウン。人工呼吸器の所在が不明。病棟から応援要請が殺到。",
+    question:"最初に取るべき行動は？",
+    choices:[
+      "① 全機器を回収する",
+      "② 人工呼吸器使用患者を把握し優先順位をつける",
+      "③ 修理業者へ電話する"
+    ],
+    answer:1,
+    code:"Z",
+    manufacturerText:"人工呼吸器、機器管理、非常時の機器所在確認、バッテリー管理について、ブース担当者から説明を受けてください。"
+  },
+
+  cath:{
+    order:4,
+    title:"STAGE4　心臓カテーテル室",
+    sub:"揺れるカテ室",
+    booth:"心臓カテーテル・循環器関連ブース",
+    story:"PCI施行中に余震発生。患者は不安定。",
+    question:"最優先事項は？",
+    choices:[
+      "① 画像保存",
+      "② 患者安全の確保",
+      "③ 次症例の準備"
+    ],
+    answer:1,
+    code:"U",
+    manufacturerText:"カテーテル治療中の災害対応、患者安全、装置停止時の初動について、ブース担当者から説明を受けてください。"
+  }
+};
+
+let activeBooth = null;
+
+function hideAll(){
+  const ids = [
+    "home",
+    "locked",
+    "stage",
+    "manufacturer",
+    "status",
+    "ending"
+  ];
+
+  ids.forEach(id => {
+    document.getElementById(id).classList.add("hidden");
+  });
+}
+
+function goHome(){
+  hideAll();
+  document.getElementById("home").classList.remove("hidden");
+}
+
+function showLocked(){
+  hideAll();
+  document.getElementById("locked").classList.remove("hidden");
+}
+
+function getProgress(){
+  const raw = localStorage.getItem("ce_nazotoki_progress");
+
+  if(!raw){
+    return {};
+  }
+
+  try{
+    return JSON.parse(raw);
+  }catch(e){
+    return {};
+  }
+}
+
+function saveProgress(progress){
+  localStorage.setItem("ce_nazotoki_progress", JSON.stringify(progress));
+}
+
+function getCodeDisplay(){
+  const progress = getProgress();
+
+  const keys = Object.keys(STAGES).sort((a,b)=>{
+    return STAGES[a].order - STAGES[b].order;
+  });
+
+  let code = "";
+
+  keys.forEach(key => {
+    if(progress[key] && progress[key].completed){
+      code += STAGES[key].code;
+    }else{
+      code += "-";
+    }
+  });
+
+  return code;
+}
+
+function showStage(key){
+  const stage = STAGES[key];
+
+  if(!stage){
+    showLocked();
+    return;
+  }
+
+  activeBooth = key;
+
+  const progress = getProgress();
+
+  if(!progress[key]){
+    progress[key] = {};
+  }
+
+  progress[key].opened = true;
+  saveProgress(progress);
+
+  hideAll();
+  document.getElementById("stage").classList.remove("hidden");
+
+  document.getElementById("boothName").textContent = stage.booth;
+  document.getElementById("stageTitle").textContent = stage.title;
+  document.getElementById("stageSub").textContent = stage.sub;
+  document.getElementById("story").textContent = stage.story;
+  document.getElementById("question").textContent = stage.question;
+  document.getElementById("stageCodes").textContent = getCodeDisplay();
+  document.getElementById("result").innerHTML = "";
+
+  const choicesDiv = document.getElementById("choices");
+  choicesDiv.innerHTML = "";
+
+  if(progress[key] && progress[key].completed){
+    document.getElementById("result").innerHTML = `
+      <p class="alert">この現場はすでに対応完了しています。</p>
+      <button class="primary" onclick="showStatus()">進行状況を確認する</button>
+    `;
+    return;
+  }
+
+  stage.choices.forEach((choice, index) => {
+    const button = document.createElement("button");
+    button.textContent = choice;
+    button.onclick = () => answerStage(index, button);
+    choicesDiv.appendChild(button);
+  });
+}
+
+function answerStage(index, button){
+  const stage = STAGES[activeBooth];
+
+  const buttons = document.querySelectorAll("#choices button");
+  buttons.forEach(btn => {
+    btn.disabled = true;
+  });
+
+  if(index === stage.answer){
+    button.classList.add("correct");
+
+    document.getElementById("result").innerHTML = `
+      <p class="alert">正解。現場の初動判断に成功しました。</p>
+      <p>続いて、ブース担当者から説明を受けてください。</p>
+      <button class="primary" onclick="showManufacturer()">メーカー説明を受ける</button>
+    `;
+  }else{
+    button.classList.add("wrong");
+
+    document.getElementById("result").innerHTML = `
+      <p class="danger">不正解。現場判断を再確認してください。</p>
+      <button onclick="showStage(activeBooth)">もう一度判断する</button>
+    `;
+  }
+}
+
+function showManufacturer(){
+  const stage = STAGES[activeBooth];
+
+  hideAll();
+  document.getElementById("manufacturer").classList.remove("hidden");
+  document.getElementById("manufacturerText").textContent = stage.manufacturerText;
+}
+
+function completeBooth(){
+  const progress = getProgress();
+
+  if(!progress[activeBooth]){
+    progress[activeBooth] = {};
+  }
+
+  progress[activeBooth].opened = true;
+  progress[activeBooth].completed = true;
+
+  saveProgress(progress);
+
+  showStatus();
+}
+
+function showStatus(){
+  hideAll();
+  document.getElementById("status").classList.remove("hidden");
+
+  const progress = getProgress();
+  const grid = document.getElementById("statusGrid");
+
+  grid.innerHTML = "";
+  document.getElementById("statusCodes").textContent = getCodeDisplay();
+
+  const keys = Object.keys(STAGES).sort((a,b)=>{
+    return STAGES[a].order - STAGES[b].order;
+  });
+
+  let allCompleted = true;
+
+  keys.forEach(key => {
+    const stage = STAGES[key];
+
+    const opened = progress[key] && progress[key].opened;
+    const completed = progress[key] && progress[key].completed;
+
+    if(!completed){
+      allCompleted = false;
+    }
+
+    let badgeText = "未確認";
+    let badgeClass = "";
+
+    if(opened && !completed){
+      badgeText = "現場確認中";
+      badgeClass = "open";
+    }
+
+    if(completed){
+      badgeText = "対応完了";
+      badgeClass = "done";
+    }
+
+    const item = document.createElement("div");
+    item.className = "status-item";
+
+    item.innerHTML = `
+      <div class="status-title">${stage.title}</div>
+      <div class="muted">${stage.booth}</div>
+      <span class="badge ${badgeClass}">${badgeText}</span>
+    `;
+
+    grid.appendChild(item);
+  });
+
+  const finalButton = document.getElementById("finalButton");
+
+  if(allCompleted){
+    finalButton.classList.remove("hidden");
+  }else{
+    finalButton.classList.add("hidden");
+  }
+}
+
+function showEnding(){
+  hideAll();
+  document.getElementById("ending").classList.remove("hidden");
+  document.getElementById("finalCode").textContent = getCodeDisplay();
+}
+
+function resetProgress(){
+  const ok = confirm("進行状況をリセットしますか？");
+
+  if(ok){
+    localStorage.removeItem("ce_nazotoki_progress");
+    alert("進行状況をリセットしました。");
+    goHome();
+  }
+}
+
+function init(){
+  const params = new URLSearchParams(window.location.search);
+  const booth = params.get("booth");
+
+  if(booth){
+    showStage(booth);
+  }else{
+    goHome();
+  }
+}
+
+init();
+</script>
+
+</body>
+</html>
