@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>CE災害対応ミッション QRコード</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:24px;color:#111;}
+h1{font-size:26px;margin-bottom:4px;}
+p{margin-top:0;color:#555;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.card{border:2px solid #222;border-radius:16px;padding:18px;text-align:center;page-break-inside:avoid;}
+.card img{width:78%;max-width:320px;}
+.title{font-size:22px;font-weight:700;margin:8px 0;}
+.booth{font-size:15px;color:#555;margin-bottom:10px;}
+.url{font-size:12px;color:#777;word-break:break-all;}
+@media print{body{margin:10mm}.card{break-inside:avoid}.grid{gap:10px}}
+</style>
+</head>
+<body>
+<h1>南海トラフ巨大地震 CE災害対応ミッション</h1>
+<p>デモ用QRコード一覧：QRコードを読み取ると、該当ブースの問題だけが表示されます。</p>
+<div class="grid">
+
+  <div class="card">
+    <div class="title">STAGE1 人工心肺室</div>
+    <div class="booth">人工心肺・補助循環関連ブース</div>
+    <img src="QR_cpb.png" alt="STAGE1 人工心肺室">
+    <div>QRコードを読み取り、現場情報を取得せよ。</div>
+    <div class="url">index.html?booth=cpb</div>
+  </div>
+
+  <div class="card">
+    <div class="title">STAGE2 透析室</div>
+    <div class="booth">透析関連ブース</div>
+    <img src="QR_dialysis.png" alt="STAGE2 透析室">
+    <div>QRコードを読み取り、現場情報を取得せよ。</div>
+    <div class="url">index.html?booth=dialysis</div>
+  </div>
+
+  <div class="card">
+    <div class="title">STAGE3 ME室</div>
+    <div class="booth">医療機器管理関連ブース</div>
+    <img src="QR_me.png" alt="STAGE3 ME室">
+    <div>QRコードを読み取り、現場情報を取得せよ。</div>
+    <div class="url">index.html?booth=me</div>
+  </div>
+
+  <div class="card">
+    <div class="title">STAGE4 心臓カテーテル室</div>
+    <div class="booth">心臓カテーテル・循環器関連ブース</div>
+    <img src="QR_cath.png" alt="STAGE4 心臓カテーテル室">
+    <div>QRコードを読み取り、現場情報を取得せよ。</div>
+    <div class="url">index.html?booth=cath</div>
+  </div>
+
+</div>
+</body>
+</html>
