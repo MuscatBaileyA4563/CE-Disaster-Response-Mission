@@ -220,6 +220,80 @@ button:disabled{
   font-size:14px;
   padding:12px;
 }
+
+.scanner-box{
+  position:relative;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#05070a;
+  min-height:280px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:14px 0;
+}
+
+#qrVideo{
+  width:100%;
+  max-height:420px;
+  object-fit:cover;
+  background:#000;
+}
+
+.scan-frame{
+  position:absolute;
+  width:72%;
+  max-width:340px;
+  aspect-ratio:1/1;
+  border:3px solid rgba(0,200,150,.9);
+  border-radius:18px;
+  box-shadow:0 0 0 999px rgba(0,0,0,.22);
+  pointer-events:none;
+}
+
+.scan-frame::before,
+.scan-frame::after{
+  content:"";
+  position:absolute;
+  left:12%;
+  right:12%;
+  height:2px;
+  background:rgba(0,255,180,.8);
+}
+
+.scan-frame::before{
+  top:18%;
+}
+
+.scan-frame::after{
+  bottom:18%;
+}
+
+.scanner-status{
+  color:var(--warn);
+  font-weight:700;
+  margin-top:8px;
+}
+
+.manual-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:10px;
+}
+
+.manual-grid button{
+  margin:0;
+  font-size:14px;
+  padding:12px;
+}
+
+@media (max-width:480px){
+  .manual-grid{
+    grid-template-columns:1fr;
+  }
+}
 </style>
 </head>
 
@@ -252,7 +326,8 @@ button:disabled{
       各ブースに設置されたQRコードを読み取ると、現場情報が表示されます。
     </p>
 
-    <button class="primary" onclick="showStatus()">進行状況を確認する</button>
+    <button class="primary" onclick="showScanner()">QRコードを読み取る</button>
+    <button onclick="showStatus()">進行状況を確認する</button>
     <button class="secondary" onclick="resetProgress()">進行状況をリセット</button>
 
     <div class="qr-list">
@@ -263,8 +338,42 @@ button:disabled{
     </div>
 
     <p class="muted">
-      ※この一覧はデモ確認用です。本番では非表示にして、各QRコードのみ掲示する想定です。
+      ※この一覧はデモ確認用です。本番では非表示にして、各ブースのQRコードのみ掲示する想定です。
     </p>
+  </section>
+
+  <!-- QR読み取り画面 -->
+  <section id="scanner" class="card hidden">
+    <h2>QRコード読み取り</h2>
+
+    <p>
+      各ブースに設置されたQRコードをカメラ枠内に入れてください。
+    </p>
+
+    <div class="scanner-box">
+      <video id="qrVideo" autoplay muted playsinline></video>
+      <div class="scan-frame"></div>
+    </div>
+
+    <div id="scannerStatus" class="scanner-status">
+      カメラ起動前です。
+    </div>
+
+    <button id="startScanButton" class="primary" onclick="startQrScanner()">カメラを起動する</button>
+    <button class="secondary" onclick="stopQrScanner(); goHome();">トップへ戻る</button>
+
+    <div class="notice">
+      <strong>カメラが使えない場合</strong><br>
+      QRコード読み取りに対応していないブラウザでは、下のデモ用ボタンで動作確認できます。<br>
+      本番ではスマホ標準カメラでQRを読み取っても同じように動作します。
+    </div>
+
+    <div class="manual-grid">
+      <button onclick="stopQrScanner(); showStage('cpb')">STAGE1 人工心肺室</button>
+      <button onclick="stopQrScanner(); showStage('dialysis')">STAGE2 透析室</button>
+      <button onclick="stopQrScanner(); showStage('me')">STAGE3 ME室</button>
+      <button onclick="stopQrScanner(); showStage('cath')">STAGE4 カテ室</button>
+    </div>
   </section>
 
   <!-- QRなしアクセス時 -->
@@ -280,7 +389,8 @@ button:disabled{
       QRコードを読み取ることで、その現場の問題が表示されます。
     </div>
 
-    <button class="primary" onclick="goHome()">トップへ戻る</button>
+    <button class="primary" onclick="showScanner()">QRコードを読み取る</button>
+    <button onclick="goHome()">トップへ戻る</button>
   </section>
 
   <!-- ステージ画面 -->
@@ -338,6 +448,7 @@ button:disabled{
       最終コードを確認する
     </button>
 
+    <button class="primary" onclick="showScanner()">QRコードを読み取る</button>
     <button onclick="goHome()">トップへ戻る</button>
   </section>
 
@@ -438,10 +549,14 @@ const STAGES = {
 };
 
 let activeBooth = null;
+let qrStream = null;
+let qrScanTimer = null;
+let barcodeDetector = null;
 
 function hideAll(){
   const ids = [
     "home",
+    "scanner",
     "locked",
     "stage",
     "manufacturer",
@@ -455,13 +570,21 @@ function hideAll(){
 }
 
 function goHome(){
+  stopQrScanner();
   hideAll();
   document.getElementById("home").classList.remove("hidden");
 }
 
 function showLocked(){
+  stopQrScanner();
   hideAll();
   document.getElementById("locked").classList.remove("hidden");
+}
+
+function showScanner(){
+  hideAll();
+  document.getElementById("scanner").classList.remove("hidden");
+  document.getElementById("scannerStatus").textContent = "カメラ起動ボタンを押してください。";
 }
 
 function getProgress(){
@@ -502,7 +625,125 @@ function getCodeDisplay(){
   return code;
 }
 
+function extractBoothKeyFromQrText(text){
+  if(!text){
+    return null;
+  }
+
+  const value = String(text).trim();
+
+  if(STAGES[value]){
+    return value;
+  }
+
+  try{
+    const url = new URL(value, window.location.href);
+    const booth = url.searchParams.get("booth");
+
+    if(booth && STAGES[booth]){
+      return booth;
+    }
+  }catch(e){
+    const match = value.match(/booth=([a-zA-Z0-9_-]+)/);
+
+    if(match && STAGES[match[1]]){
+      return match[1];
+    }
+  }
+
+  return null;
+}
+
+async function startQrScanner(){
+  const status = document.getElementById("scannerStatus");
+  const video = document.getElementById("qrVideo");
+
+  if(!window.isSecureContext){
+    status.textContent = "カメラ利用にはHTTPS接続が必要です。GitHub PagesのURLで開いてください。";
+    return;
+  }
+
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    status.textContent = "このブラウザではカメラ起動に対応していません。スマホ標準カメラでQRを読み取ってください。";
+    return;
+  }
+
+  if(!("BarcodeDetector" in window)){
+    status.textContent = "このブラウザはアプリ内QR読み取りに未対応です。スマホ標準カメラでQRを読み取るか、下のデモ用ボタンを使ってください。";
+    return;
+  }
+
+  try{
+    barcodeDetector = new BarcodeDetector({ formats:["qr_code"] });
+    qrStream = await navigator.mediaDevices.getUserMedia({
+      video:{
+        facingMode:{ ideal:"environment" },
+        width:{ ideal:1280 },
+        height:{ ideal:720 }
+      },
+      audio:false
+    });
+
+    video.srcObject = qrStream;
+    await video.play();
+
+    status.textContent = "読み取り中です。QRコードを枠内に入れてください。";
+
+    if(qrScanTimer){
+      clearInterval(qrScanTimer);
+    }
+
+    qrScanTimer = setInterval(async () => {
+      if(!barcodeDetector || video.readyState < 2){
+        return;
+      }
+
+      try{
+        const barcodes = await barcodeDetector.detect(video);
+
+        if(barcodes.length > 0){
+          const rawValue = barcodes[0].rawValue;
+          const boothKey = extractBoothKeyFromQrText(rawValue);
+
+          if(boothKey){
+            status.textContent = "QRコードを読み取りました。現場情報を表示します。";
+            stopQrScanner();
+            showStage(boothKey);
+          }else{
+            status.textContent = "このミッション用QRコードではありません。別のQRコードを読み取ってください。";
+          }
+        }
+      }catch(e){
+        status.textContent = "読み取り処理中です。QRコードをもう少し明るい場所で読み取ってください。";
+      }
+    }, 450);
+  }catch(e){
+    status.textContent = "カメラを起動できませんでした。ブラウザのカメラ許可を確認してください。";
+  }
+}
+
+function stopQrScanner(){
+  if(qrScanTimer){
+    clearInterval(qrScanTimer);
+    qrScanTimer = null;
+  }
+
+  const video = document.getElementById("qrVideo");
+
+  if(video){
+    video.pause();
+    video.srcObject = null;
+  }
+
+  if(qrStream){
+    qrStream.getTracks().forEach(track => track.stop());
+    qrStream = null;
+  }
+}
+
 function showStage(key){
+  stopQrScanner();
+
   const stage = STAGES[key];
 
   if(!stage){
@@ -539,6 +780,7 @@ function showStage(key){
     document.getElementById("result").innerHTML = `
       <p class="alert">この現場はすでに対応完了しています。</p>
       <button class="primary" onclick="showStatus()">進行状況を確認する</button>
+      <button onclick="showScanner()">別のQRコードを読み取る</button>
     `;
     return;
   }
@@ -601,6 +843,7 @@ function completeBooth(){
 }
 
 function showStatus(){
+  stopQrScanner();
   hideAll();
   document.getElementById("status").classList.remove("hidden");
 
@@ -661,6 +904,7 @@ function showStatus(){
 }
 
 function showEnding(){
+  stopQrScanner();
   hideAll();
   document.getElementById("ending").classList.remove("hidden");
   document.getElementById("finalCode").textContent = getCodeDisplay();
